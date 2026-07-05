@@ -1,0 +1,100 @@
+<script setup lang="ts">
+import axios from 'axios'
+import { onMounted, onUnmounted, ref } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import type { ResourceResponse } from '@/util/types';
+import { TrashIcon } from '@heroicons/vue/24/solid';
+import ResourceField from '@/composables/ResourceField.vue';
+import TagAddField from '@/composables/TagAddField.vue';
+
+const authStore = useAuthStore();
+const resources = ref<ResourceResponse[]>([])
+
+onMounted(async () => {
+  const uid = authStore.user?.id;
+  if (uid == null) return;
+
+  await axios.get(`/api/${uid}/resources`)
+    .then(response => {
+      resources.value = response.data;
+    })
+    .catch(error => {
+      console.log(error);
+    });
+});
+
+function deleteTag(rid: number, tid: number) {
+  const uid = authStore.user?.id;
+  if (uid == null) return;
+
+  axios.delete(`/api/${rid}/tag/${tid}`)
+    .then(_ => {
+    })
+    .catch(error => {
+      console.log(error);
+    });
+
+  const newResources = resources.value.map(val => {
+    if (val['id'] == rid) {
+      const newTags = val.tags.filter(tag => tag.id != tid);
+      val.tags = newTags;
+      return val
+    } else return val;
+  });
+
+  resources.value = newResources;
+}
+
+async function refreshTags(newResource: ResourceResponse) {
+  const uid = authStore.user?.id;
+  if (uid == null) return;
+
+  console.log(newResource);
+
+  const newResources = resources.value.map(val => {
+    if (val['id'] == newResource.id) {
+      val = newResource;
+      return val;
+    } else return val;
+  });
+
+  resources.value = newResources;
+}
+
+function updateResources(id: number, value: string) {
+  const newResources = resources.value.map(val => {
+    if (val['id'] == id) {
+      val['url'] = value;
+      return val;
+    } else return val
+  });
+  resources.value = newResources;
+
+  const payload = {
+    url: value
+  }
+
+  axios.put(`/api/resource/${id}`, payload)
+    .then((_) => {})
+    .catch(error => {
+      console.log(error)
+    })
+}
+</script>
+
+<template>
+  <div class="flex-1 px-1 py-1">
+    <ul class="space-y-1">
+      <li v-for="resource in resources" :key="resource.id" class="flex items-center gap-1 py-3">
+        <ResourceField :url="resource.url" :resource-id="resource.id" @url-changed="updateResources"/>
+        <span v-for="tag in resource.tags" :key="tag.id" class="badge badge-primary text-nowrap relative">
+          <component :is="TrashIcon" class="shrink-0 h-4 w-4 absolute -left-0.5 -translate-y-2 cursor-pointer"
+          @click="deleteTag(resource.id, tag.id)"
+          />
+          {{ tag.tag }}
+        </span>
+        <TagAddField :resource-id="resource.id" @tag-added="refreshTags"/>
+      </li>
+    </ul>
+  </div>
+</template>
