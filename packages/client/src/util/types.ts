@@ -10,4 +10,8 @@ interface ResourceResponse {
   tags: TagResponse[]
 }
 
+interface ResourceRequest {
+  url: string
+}
+
 export { type TagResponse, type ResourceResponse }

@@ -6,6 +6,7 @@ import type { ResourceResponse } from '@/util/types';
 import { TrashIcon } from '@heroicons/vue/24/solid';
 import ResourceField from '@/composables/ResourceField.vue';
 import TagAddField from '@/composables/TagAddField.vue';
+import ResourceAddField from '@/composables/ResourceAddField.vue';
 
 const authStore = useAuthStore();
 const resources = ref<ResourceResponse[]>([])
@@ -49,8 +50,6 @@ async function refreshTags(newResource: ResourceResponse) {
   const uid = authStore.user?.id;
   if (uid == null) return;
 
-  console.log(newResource);
-
   const newResources = resources.value.map(val => {
     if (val['id'] == newResource.id) {
       val = newResource;
@@ -80,15 +79,28 @@ function updateResources(id: number, value: string) {
       console.log(error)
     })
 }
+
+function appendResource(resource : ResourceResponse) {
+  const newResources = [...resources.value, resource];
+  resources.value = newResources;
+}
+
+function removeResource(id: number) {
+  const newResources = resources.value.filter(val => val.id != id);
+  resources.value = newResources;
+}
 </script>
 
 <template>
   <div class="flex-1 px-1 py-1">
     <ul class="space-y-1">
       <li v-for="resource in resources" :key="resource.id" class="flex items-center gap-1 py-3">
-        <ResourceField :url="resource.url" :resource-id="resource.id" @url-changed="updateResources"/>
-        <span v-for="tag in resource.tags" :key="tag.id" class="badge badge-primary text-nowrap relative">
-          <component :is="TrashIcon" class="shrink-0 h-4 w-4 absolute -left-0.5 -translate-y-2 cursor-pointer"
+        <ResourceField :url="resource.url" :resource-id="resource.id"
+          @url-changed="updateResources"
+          @resource-deleted="removeResource"
+        />
+        <span v-for="tag in resource.tags" :key="tag.id" class="badge badge-primary text-nowrap relative tag-box">
+          <component :is="TrashIcon" class="shrink-0 h-4 w-4 absolute -right-0.5 -translate-y-2 cursor-pointer trash-icon"
           @click="deleteTag(resource.id, tag.id)"
           />
           {{ tag.tag }}
@@ -96,5 +108,18 @@ function updateResources(id: number, value: string) {
         <TagAddField :resource-id="resource.id" @tag-added="refreshTags"/>
       </li>
     </ul>
+    <div class="flex items-center gap-1 py-3">
+      <ResourceAddField @resource-added="appendResource"/>
+    </div>
   </div>
 </template>
+
+<style lang="css" scoped>
+.trash-icon {
+  display: none;
+}
+
+.tag-box:hover .trash-icon {
+  display: block;
+}
+</style>

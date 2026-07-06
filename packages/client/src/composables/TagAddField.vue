@@ -41,6 +41,7 @@ async function save() {
     });
 
   isAdding.value = false;
+  newTagValue.value = "";
 }
 </script>
 

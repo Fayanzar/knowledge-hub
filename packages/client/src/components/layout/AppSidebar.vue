@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
 import { ChevronLeftIcon, ChevronRightIcon, HomeIcon, BookmarkIcon, TagIcon, StarIcon,
-  InboxIcon, ChartBarIcon, Cog6ToothIcon
+  InboxIcon, ChartBarIcon, Cog6ToothIcon, PlusIcon
  } from '@heroicons/vue/24/solid';
 import { useRoute, useRouter } from 'vue-router';
 

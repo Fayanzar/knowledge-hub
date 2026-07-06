@@ -5,9 +5,11 @@ import { useAuthStore } from '@/stores/auth';
 import type { TagResponse } from '@/util/types';
 import TagField from '@/composables/TagField.vue';
 import { TrashIcon } from '@heroicons/vue/24/solid';
+import { useConfirm } from '@/util/useConfirm';
 
 const authStore = useAuthStore();
 const tags = ref<TagResponse[]>([]);
+const { confirm } = useConfirm();
 
 onMounted(async () => {
   const uid = authStore.user?.id;
@@ -42,9 +44,19 @@ function updateTag(id: number, value: string) {
     });
 }
 
-function deleteTag(tid: number) {
+async function deleteTag(tid: number) {
   const uid = authStore.user?.id;
   if (uid == null) return;
+
+  const { confirmed } = await confirm({
+    title: 'Delete item?',
+    message: "It will be permanently deleted.",
+    confirmText: 'Delete',
+    cancelText: 'Keep it',
+    danger: true,
+  })
+
+  if (!confirmed) return;
 
   axios.delete(`/api/tag/${tid}`)
     .then(_ => {
@@ -61,11 +73,21 @@ function deleteTag(tid: number) {
 
 <template>
   <div class="flex items-center gap-1 py-3">
-    <span v-for="tag in tags" :key="tag.id" class="badge badge-primary text-nowrap relative">
-      <component :is="TrashIcon" class="shrink-0 h-4 w-4 absolute -left-0.5 -translate-y-2 cursor-pointer"
+    <span v-for="tag in tags" :key="tag.id" class="badge badge-primary text-nowrap relative tag-box">
+      <component :is="TrashIcon" class="shrink-0 h-4 w-4 absolute -right-0.5 -translate-y-2 cursor-pointer trash-icon"
         @click="deleteTag(tag.id)"
       />
       <TagField :tag-value="tag.tag" :tag-id="tag.id" @tag-changed="updateTag"/>
     </span>
   </div>
 </template>
+
+<style lang="css" scoped>
+.trash-icon {
+  display: none;
+}
+
+.tag-box:hover .trash-icon {
+  display: block;
+}
+</style>

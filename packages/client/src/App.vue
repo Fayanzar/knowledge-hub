@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import ConfirmDialog from './components/features/ConfirmDialog.vue';
 </script>
 
 <template>
@@ -17,6 +18,7 @@ import { RouterLink, RouterView } from 'vue-router'
   </header>
 
   <RouterView />
+  <ConfirmDialog />
 </template>
 
 <style scoped>

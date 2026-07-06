@@ -89,7 +89,7 @@ async (req: Request, res: Response, next: NextFunction) => {
         url: url
       }
     });
-  res.json({id: resource.id});
+    res.json({id: resource.id});
   } catch (error) {
     if (error instanceof PrismaClientKnownRequestError) {
       if (error.code == PrismaError.UniqueConstraintFailed)
