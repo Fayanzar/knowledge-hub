@@ -3,6 +3,7 @@ import axios from 'axios'
 import { nextTick, ref, useTemplateRef, watch } from 'vue';
 import { PlusIcon, CheckIcon } from '@heroicons/vue/24/solid';
 import type { ResourceResponse } from '@/util/types';
+import { useStatsStore } from '@/stores/stats';
 
 const props = defineProps<{
   resourceId: number
@@ -16,6 +17,8 @@ const isAdding = ref(false);
 const editInput = useTemplateRef("editInput");
 
 const newTagValue = ref("");
+
+const statsStore = useStatsStore();
 
 async function toggleAddMode() {
   isAdding.value = !isAdding.value;
@@ -35,6 +38,7 @@ async function save() {
   axios.post(`/api/${props.resourceId}/tag`, payload)
     .then((response) => {
       emit("tagAdded", response.data);
+      statsStore.notifyDataChanged(['tag']);
     })
     .catch(error => {
       console.log(error)

@@ -1,58 +1,46 @@
-import { ref } from 'vue'
+import { computed } from 'vue'
 import { defineStore } from 'pinia'
-import axios from 'axios'
-
-interface User {
-  name: string,
-  token: string
-  id: number
-}
+import { authClient } from '@/auth-client'
 
 interface LoginPayload {
-  id: number,
   email: string,
   password: string
 }
 
-function base64ToUtf8(b64: string) {
-    const binaryString = atob(b64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
-    const decoder = new TextDecoder();
-    return decoder.decode(bytes);
-}
-
-function parseUsername(token: string) {
-  const [login, _] = base64ToUtf8(token).split(':');
-  return login == null ? "user" : login;
-}
-
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null);
+  // 1. Better Auth automatically manages this reactive session state
+  const session = authClient.useSession();
 
-  async function login(payload: LoginPayload) {
-    console.log('Login payload:', payload);
+  // 2. Computed properties keep your store clean and intuitive
+  const user = computed(() => session.value.data?.user ?? null);
+  const isLoading = computed(() => session.value.isPending);
+  const isAuthenticated = computed(() => !!session.value.data?.session);
 
-    await axios.post('/api/login', payload).then(response => {
-        const token = response.data.token as string;
-        console.log(`Logged in with: ${token}, ${response.data.id}`);
+  // 3. Simple wrappers for your auth methods
+  const login = async (payload : LoginPayload) => {
+    return await authClient.signIn.email({
+      email: payload.email,
+      password: payload.password
+    });
+  };
 
-        const loggedUser = {
-          name: parseUsername(token),
-          token: token,
-          id: response.data.id as number
-        }
-        user.value = loggedUser;
+  const logout = async () => {
+    return await authClient.signOut();
+  };
 
-        axios.defaults.headers.common.Authorization = `Basic ${token}`
-      });
-  }
+  // 4. Force a manual freshness check (optional)
+  // Better Auth updates `useSession` automatically, but this is great for route guards
+  const checkSession = async () => {
+    const { data } = await authClient.getSession();
+    return !!data;
+  };
 
-  async function logout() {
-    user.value = null;
-  }
-
-  return { user, login, logout }
-})
+  return {
+    user,
+    isAuthenticated,
+    isLoading,
+    login,
+    logout,
+    checkSession
+  };
+});

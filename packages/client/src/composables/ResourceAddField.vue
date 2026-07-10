@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth';
-import { nextTick, ref, useTemplateRef, watch } from 'vue';
+import { nextTick, ref, useTemplateRef } from 'vue';
 import { PlusIcon, CheckIcon } from '@heroicons/vue/24/solid';
 import type { ResourceResponse } from '@/util/types';
+import { useStatsStore } from '@/stores/stats';
 
 const emit = defineEmits<{
   resourceAdded: [resource: ResourceResponse]
@@ -14,6 +15,7 @@ const editInput = useTemplateRef("editInput");
 
 const newResourceUrl = ref("");
 const authStore = useAuthStore();
+const statsStore = useStatsStore();
 
 async function toggleAddMode() {
   isAdding.value = !isAdding.value;
@@ -55,6 +57,7 @@ async function validateAndSave() {
         }
         emit("resourceAdded", newResource);
         isAdding.value = false;
+        statsStore.notifyDataChanged(['resource']);
       })
       .catch(error => {
         console.log(error)

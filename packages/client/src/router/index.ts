@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import AppLogin from '@/components/layout/AppLogin.vue'
+import AppRegister from '@/components/layout/AppRegister.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,6 +40,11 @@ const router = createRouter({
           path: 'settings',
           name: "Settings",
           component: () => import('../views/SettingsView.vue')
+        },
+        {
+          path: 'profile',
+          name: "Profile",
+          component: () => import('../views/ProfileView.vue')
         }
       ]
     },
@@ -46,6 +52,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: AppLogin
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: AppRegister
     },
     {
       path: '/about',

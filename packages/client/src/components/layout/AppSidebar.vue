@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { ChevronLeftIcon, ChevronRightIcon, HomeIcon, BookmarkIcon, TagIcon, StarIcon,
   InboxIcon, ChartBarIcon, Cog6ToothIcon, PlusIcon
  } from '@heroicons/vue/24/solid';
 import { useRoute, useRouter } from 'vue-router';
+import { useStatsStore } from '@/stores/stats';
 
 const route = useRoute()
 const router = useRouter()
+
+const statsStore = useStatsStore();
 
 const expanded = ref(true)
 const showAllTags = ref(false)
@@ -27,22 +30,11 @@ interface NavItem {
   badge?: number
 }
 
-interface Tag {
-  id: number,
-  name: string,
-  color: string,
-  count: number
-}
-
 const isActive = (item: NavItem) => {
   return route.path === item.path || route.path.startsWith(item.path + '/')
 }
 
-const stats = ref({
-  totalResources: 147,
-  totalTags: 32,
-  unreadResources: 8
-})
+const stats = ref(statsStore.stats)
 
 const toggleExpand = () => {
   expanded.value = !expanded.value;
@@ -50,9 +42,9 @@ const toggleExpand = () => {
 
 const toggleShowAllTags = () => {
   if (showAllTags.value) {
-    displayedTags.value = popularTags.value.slice(0, 5);
+    displayedTags.value = () => statsStore.stats.tagsWithCount.slice(0, 5);
   } else {
-    displayedTags.value = popularTags.value;
+    displayedTags.value = () => statsStore.stats.tagsWithCount;
   }
   showAllTags.value = !showAllTags.value;
 }
@@ -67,17 +59,8 @@ const navItems = [
   { name: 'Settings', path: '/settings', icon: Cog6ToothIcon }
 ]
 
-const popularTags = ref([
-  { id: 1, name: 'Vue.js', color: '#42b883', count: 24 },
-  { id: 2, name: 'JavaScript', color: '#f7df1e', count: 18 },
-  { id: 3, name: 'Interview', color: '#3b82f6', count: 12 },
-  { id: 4, name: 'Backend', color: '#ef4444', count: 8 },
-  { id: 5, name: 'DevOps', color: '#8b5cf6', count: 5 },
-  { id: 6, name: 'Design', color: '#ec4899', count: 3 }
-])
-
-const displayedTags = ref<Tag[]>([])
-displayedTags.value = popularTags.value.slice(0, 5);
+const popularTags = ref(() => statsStore.stats.tagsWithCount);
+const displayedTags = ref(() => statsStore.stats.tagsWithCount.slice(0, 5));
 
 const filterByTag = (tagName: string) => {
   router.push({
@@ -102,6 +85,10 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', checkMobile)
 })
+
+watch(() => statsStore.version, async () => {
+  await statsStore.fetchStatsIfStale();
+}, { immediate: true });
 </script>
 
 <template>
@@ -187,7 +174,7 @@ onUnmounted(() => {
 
           <ul class="space-y-1">
             <li
-              v-for="(tag, index) in displayedTags"
+              v-for="(tag, index) in displayedTags()"
               :key="tag.id"
               class="transition-all duration-300 ease-out overflow-hidden"
               :style="{
@@ -198,14 +185,14 @@ onUnmounted(() => {
               }"
             >
               <button
-                @click="filterByTag(tag.name)"
+                @click="filterByTag(tag.tag)"
                 class="flex items-center w-full text-left px-3 py-2 rounded-lg transition-colors hover:bg-base-200 text-gray-700 dark:text-gray-300"
               >
                 <div
                   class="w-3 h-3 rounded-full mr-2"
                   :style="{ backgroundColor: tag.color }"
                 ></div>
-                <span class="text-sm flex-1 pl-1">{{ tag.name }}</span>
+                <span class="text-sm flex-1 pl-1">{{ tag.tag }}</span>
                 <span class="text-xs text-gray-500">{{ tag.count }}</span>
               </button>
             </li>
@@ -213,7 +200,7 @@ onUnmounted(() => {
 
           <!-- Show more/less button -->
           <button
-            v-if="expanded && popularTags.length > 5"
+            v-if="expanded && popularTags().length > 5"
             @click="toggleShowAllTags"
             class="mt-2 text-sm text-primary hover:underline w-full text-left px-3 transition-all duration-300"
             :style="{
@@ -244,7 +231,7 @@ onUnmounted(() => {
                 'transform': expanded ? 'translateX(0)' : 'translateX(-10px)',
               }">
                 <span>Resources</span>
-                <span class="font-semibold">{{ stats.totalResources }}</span>
+                <span class="font-semibold">{{ stats.resourceCount }}</span>
               </div>
               <div class="flex justify-between text-sm transition-all duration-300 ease-out overflow-hidden"
               :style="{
@@ -253,7 +240,7 @@ onUnmounted(() => {
                 'transform': expanded ? 'translateX(0)' : 'translateX(-10px)',
               }">
                 <span>Tags</span>
-                <span class="font-semibold">{{ stats.totalTags }}</span>
+                <span class="font-semibold">{{ stats.tagCount }}</span>
               </div>
               <div class="flex justify-between text-sm transition-all duration-300 ease-out overflow-hidden"
               :style="{
@@ -262,7 +249,7 @@ onUnmounted(() => {
                 'transform': expanded ? 'translateX(0)' : 'translateX(-10px)',
               }">
                 <span>Unread</span>
-                <span class="font-semibold">{{ stats.unreadResources }}</span>
+                <span class="font-semibold">{{ stats.unreadResourceCount }}</span>
               </div>
             </div>
           </div>

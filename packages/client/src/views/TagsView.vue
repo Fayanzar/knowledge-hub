@@ -6,10 +6,13 @@ import type { TagResponse } from '@/util/types';
 import TagField from '@/composables/TagField.vue';
 import { TrashIcon } from '@heroicons/vue/24/solid';
 import { useConfirm } from '@/util/useConfirm';
+import { useStatsStore } from '@/stores/stats';
 
 const authStore = useAuthStore();
 const tags = ref<TagResponse[]>([]);
 const { confirm } = useConfirm();
+
+const statsStore = useStatsStore();
 
 onMounted(async () => {
   const uid = authStore.user?.id;
@@ -38,7 +41,9 @@ function updateTag(id: number, value: string) {
   }
 
   axios.put(`/api/tag/${id}`, payload)
-    .then((_) => {})
+    .then((_) => {
+      statsStore.notifyDataChanged(['tag']);
+    })
     .catch(error => {
       console.log(error)
     });
@@ -49,7 +54,7 @@ async function deleteTag(tid: number) {
   if (uid == null) return;
 
   const { confirmed } = await confirm({
-    title: 'Delete item?',
+    title: 'Delete tag?',
     message: "It will be permanently deleted.",
     confirmText: 'Delete',
     cancelText: 'Keep it',
@@ -60,6 +65,7 @@ async function deleteTag(tid: number) {
 
   axios.delete(`/api/tag/${tid}`)
     .then(_ => {
+      statsStore.notifyDataChanged(['tag']);
     })
     .catch(error => {
       console.log(error);

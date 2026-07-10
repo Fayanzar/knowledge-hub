@@ -22,16 +22,47 @@ async (_req: Request, res: Response, next: NextFunction) => {
 export const getUserTags =
 async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = parseInt(req.params.uid as string);
-    if (Number.isNaN(userId))
-      throw new APIError("bad user id", 400);
-
+    const userId = req.params.uid as string;
     const tags = await prisma.tag.findMany({
       where: {
         userId: userId
       }
     })
     res.json(tags);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const getUserTagsWithCount =
+async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.params.uid as string;
+
+    const tags = await prisma.tag.findMany({
+      relationLoadStrategy: 'join',
+      include: {
+        _count: {
+          select: { resources: true }
+        }
+      },
+      orderBy: {
+        resources: {
+          _count: 'desc'
+        }
+      },
+      where: {
+        userId: userId
+      }
+    })
+    res.json(tags.map(v => {
+      return {
+        tag: v.tag,
+        id: v.id,
+        userId: v.userId,
+        count: v._count.resources
+      }
+    }));
   } catch (error) {
     next(error);
   }
@@ -252,10 +283,8 @@ export const deleteAllUserTags =
 async (req: Request, res: Response, next: NextFunction) => {
   try {
     const loggedUid = await authUser(req);
-    const userId = parseInt(req.params.uid as string);
+    const userId = req.params.uid as string;
     if (loggedUid != userId) throw new APIError('not authorized', 401);
-    if (Number.isNaN(userId))
-      throw new APIError("bad user id", 400);
 
     await prisma.tag.deleteMany({
       where: {

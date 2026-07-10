@@ -4,6 +4,7 @@ import { BookmarkIcon, PencilIcon } from '@heroicons/vue/24/outline';
 import { TrashIcon } from '@heroicons/vue/24/solid';
 import axios from 'axios';
 import { useConfirm } from '@/util/useConfirm';
+import { useStatsStore } from '@/stores/stats';
 
 const props = defineProps<{
   resourceId: number,
@@ -18,6 +19,8 @@ const emit = defineEmits<{
 const isEditing = ref(false);
 const { confirm } = useConfirm();
 const editInput = useTemplateRef("editInput");
+
+const statsStore = useStatsStore();
 
 const toggleEditMode = async () => {
   isEditing.value = !isEditing.value;
@@ -58,7 +61,7 @@ async function validateAndSave(id: number) {
 
 async function deleteResource() {
     const { confirmed } = await confirm({
-    title: 'Delete item?',
+    title: 'Delete resource?',
     message: "It will be permanently deleted.",
     confirmText: 'Delete',
     cancelText: 'Keep it',
@@ -67,7 +70,10 @@ async function deleteResource() {
 
   if (confirmed)
     await axios.delete(`/api/resource/${props.resourceId}`)
-      .then(_ => emit("resourceDeleted", props.resourceId))
+      .then(_ => {
+        emit("resourceDeleted", props.resourceId);
+        statsStore.notifyDataChanged(['resource', 'tag']);
+      })
       .catch(error => {
         console.log(error);
       });

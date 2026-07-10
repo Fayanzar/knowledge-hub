@@ -22,10 +22,7 @@ async (_req: Request, res: Response, next: NextFunction) => {
 export const getUserResources =
 async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = Number(req.params.uid as string);
-    if (Number.isNaN(userId))
-      throw new APIError("bad user id", 400);
-
+    const userId = req.params.uid as string;
     const resources = await prisma.resource.findMany({
       relationLoadStrategy: 'join',
       include: {
@@ -75,10 +72,9 @@ export const postUserResource =
 async (req: Request, res: Response, next: NextFunction) => {
   try {
     const loggedUid = await authUser(req);
-    const userId = Number(req.params.uid as string);
+    const userId = req.params.uid as string;
+
     if (loggedUid != userId) throw new APIError('not authorized', 401);
-    if (Number.isNaN(userId))
-      throw new APIError("bad user id", 400);
 
     const url = (req.body as PostResourceRequest).url;
     if (!validateUrl(url))
@@ -173,10 +169,8 @@ export const deleteAllUserResources =
 async (req: Request, res: Response, next: NextFunction) => {
   try {
     const loggedUid = await authUser(req);
-    const userId = parseInt(req.params.uid as string);
+    const userId = req.params.uid as string;
     if (loggedUid != userId) throw new APIError('not authorized', 401);
-    if (Number.isNaN(userId))
-      throw new APIError("bad user id", 400);
 
     await prisma.tag.deleteMany({
       where: {

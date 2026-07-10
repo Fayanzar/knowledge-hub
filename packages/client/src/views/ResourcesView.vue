@@ -7,9 +7,12 @@ import { TrashIcon } from '@heroicons/vue/24/solid';
 import ResourceField from '@/composables/ResourceField.vue';
 import TagAddField from '@/composables/TagAddField.vue';
 import ResourceAddField from '@/composables/ResourceAddField.vue';
+import { useStatsStore } from '@/stores/stats';
 
 const authStore = useAuthStore();
 const resources = ref<ResourceResponse[]>([])
+
+const statsStore = useStatsStore();
 
 onMounted(async () => {
   const uid = authStore.user?.id;
@@ -30,6 +33,7 @@ function deleteTag(rid: number, tid: number) {
 
   axios.delete(`/api/${rid}/tag/${tid}`)
     .then(_ => {
+      statsStore.notifyDataChanged(['tag']);
     })
     .catch(error => {
       console.log(error);
