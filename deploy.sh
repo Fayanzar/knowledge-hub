@@ -12,6 +12,6 @@ pm2 restart ecosystem.config.cjs
 
 # frontend
 cd ../client
-npm ci
+npm install
 npm run build
 rsync -a --delete dist/ /var/www/knowledge-hub/dist/
