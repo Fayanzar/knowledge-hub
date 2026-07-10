@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-cd /var/www/knowledge-hub
+cd /home/fayanzar/knowledge-hub
 git pull origin main
 
 # backend
@@ -14,4 +14,4 @@ pm2 restart ecosystem.config.cjs
 cd ../client
 npm install
 npm run build
-rsync -a --delete dist/ /var/www/knowledge-hub/dist/
+rsync -a --delete dist/ /home/fayanzar/public_html/hub.fayanzar.art/
