@@ -7,6 +7,12 @@ interface LoginPayload {
   password: string
 }
 
+interface RegisterPayload {
+  name: string,
+  email: string,
+  password: string
+}
+
 export const useAuthStore = defineStore('auth', () => {
   // 1. Better Auth automatically manages this reactive session state
   const session = authClient.useSession();
@@ -19,6 +25,14 @@ export const useAuthStore = defineStore('auth', () => {
   // 3. Simple wrappers for your auth methods
   const login = async (payload : LoginPayload) => {
     return await authClient.signIn.email({
+      email: payload.email,
+      password: payload.password
+    });
+  };
+
+  const register = async (payload : RegisterPayload) => {
+    return await authClient.signUp.email({
+      name: payload.name,
       email: payload.email,
       password: payload.password
     });
@@ -40,6 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isLoading,
     login,
+    register,
     logout,
     checkSession
   };
