@@ -22,9 +22,9 @@ const login = async () => {
 </script>
 
 <template>
-  <div class="flex gap-2">
+  <form @submit.prevent="login" class="flex gap-2">
     <input type="email" class="input input-bordered w-full pl-10" v-model="email" placeholder="Email" />
     <input type="password" class="input input-bordered w-full pl-10" v-model="password" placeholder="Password" />
-    <button @click="login" class="btn btn-primary">Login</button>
-  </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
 </template>
