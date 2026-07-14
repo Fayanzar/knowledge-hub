@@ -21,6 +21,8 @@ const emit = defineEmits(['toggle-sidebar'])
 const authStore = useAuthStore()
 const router = useRouter()
 
+const isMobile = ref(false)
+
 const searchQuery = ref('')
 const notifications = ref([
   { id: 1, message: 'New resource saved: Vue 3 Guide', time: '5 min ago' },
@@ -50,7 +52,12 @@ const logout = async () => {
 }
 
 onMounted(() => {
+  isMobile.value = (window.innerWidth < 768)
+  const handleResize = () => {
+    isMobile.value = (window.innerWidth < 768)
+  }
 
+  window.addEventListener('resize', handleResize)
 })
 </script>
 

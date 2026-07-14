@@ -97,21 +97,27 @@ function removeResource(id: number) {
 
 <template>
   <div class="flex-1 px-1 py-1">
-    <ul class="space-y-1">
-      <li v-for="resource in resources" :key="resource.id" class="flex items-center gap-1 py-3">
-        <ResourceField :url="resource.url" :resource-id="resource.id"
-          @url-changed="updateResources"
-          @resource-deleted="removeResource"
-        />
-        <span v-for="tag in resource.tags" :key="tag.id" class="badge badge-primary text-nowrap relative tag-box">
-          <component :is="TrashIcon" class="shrink-0 h-4 w-4 absolute -right-0.5 -translate-y-2 cursor-pointer trash-icon"
-          @click="deleteTag(resource.id, tag.id)"
-          />
-          {{ tag.tag }}
-        </span>
-        <TagAddField :resource-id="resource.id" @tag-added="refreshTags"/>
-      </li>
-    </ul>
+    <table class="space-y-1">
+      <tbody>
+        <tr v-for="resource in resources" :key="resource.id" class="flex items-center gap-1 py-1">
+          <td class="flex items-center gap-1 py-3">
+            <ResourceField :url="resource.url" :resource-id="resource.id"
+              @url-changed="updateResources"
+              @resource-deleted="removeResource"
+            />
+          </td>
+          <td class="flex flex-wrap items-center gap-1 py-3">
+            <span v-for="tag in resource.tags" :key="tag.id" class="badge badge-primary text-nowrap relative tag-box">
+              <component :is="TrashIcon" class="shrink-0 h-4 w-4 absolute -right-0.5 -translate-y-2 cursor-pointer trash-icon"
+              @click="deleteTag(resource.id, tag.id)"
+              />
+              {{ tag.tag }}
+            </span>
+            <TagAddField :resource-id="resource.id" @tag-added="refreshTags"/>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <div class="flex items-center gap-1 py-3">
       <ResourceAddField @resource-added="appendResource"/>
     </div>

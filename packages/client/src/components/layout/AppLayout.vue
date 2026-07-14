@@ -30,7 +30,7 @@ main {
 </style>
 
 <template>
-  <div class="min-h screen bg-base-100">
+  <div class="bg-base-100 w-full">
     <AppHeader @toggle-sidebar="toggleMobileSidebar"/>
     <div class="flex">
       <AppSidebar
