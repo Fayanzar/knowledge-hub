@@ -71,10 +71,9 @@ const filterByTag = (tagName: string) => {
 }
 
 const checkMobile = () => {
-  isMobile.value = window.innerWidth < 768
-  if (!isMobile.value) {
+  if (isMobile.value != window.innerWidth < 768)
     expanded.value = true
-  }
+  isMobile.value = window.innerWidth < 768
 }
 
 onMounted(() => {
@@ -97,16 +96,20 @@ watch(() => statsStore.version, async () => {
       'sidebar bg-base-100 border-r border-gray-200 dark:border-gray-700 transition-all duration-300',
       { 'w-64': expanded, 'w-20': !expanded },
       { 'hidden': !isMobileOpen && isMobile },
-      { 'fixed md:relative z-30 h-screen': isMobile }
+      { 'fixed md:relative z-40 h-screen': isMobile }
     ]"
   >
     <div
       v-if="isMobile && isMobileOpen"
-      class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
+      class="md:hidden fixed inset-0 bg-black/50 z-20"
       @click="$emit('close-sidebar')"
     ></div>
 
-    <div class="h-full flex flex-col">
+    <div
+      :class="[
+        'h-full flex flex-col',
+        { 'z-30 relative': isMobile }
+      ]">
       <div class="hidden md:flex justify-end pr-4 pl-4 pt-4">
         <button
           type="button"

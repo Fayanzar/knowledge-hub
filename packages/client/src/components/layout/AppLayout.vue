@@ -30,9 +30,9 @@ main {
 </style>
 
 <template>
-  <div class="bg-base-100 w-full">
+  <div class="bg-base-100 w-full h-full">
     <AppHeader @toggle-sidebar="toggleMobileSidebar"/>
-    <div class="flex">
+    <div class="flex h-full">
       <AppSidebar
         v-if="authStore.user"
         :is-mobile-open="mobileSidebarOpen"
