@@ -23,7 +23,7 @@ const register = async () => {
 </script>
 
 <template>
-  <form class="flex gap-2" @submit.prevent="register">
+  <form class="flex gap-2 h-full items-center" @submit.prevent="register">
     <input type="name" class="input input-bordered w-full pl-10" v-model="name" placeholder="Name" />
     <input type="email" class="input input-bordered w-full pl-10" v-model="email" placeholder="Email" />
     <input type="password" class="input input-bordered w-full pl-10" v-model="password" placeholder="Password" />
