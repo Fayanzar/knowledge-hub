@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { onMounted, onUnmounted, ref, nextTick, useTemplateRef } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import type { TagResponse } from '@/util/types';
 import TagField from '@/composables/TagField.vue';
-import { TrashIcon } from '@heroicons/vue/24/solid';
 import { useConfirm } from '@/util/useConfirm';
 import { useStatsStore } from '@/stores/stats';
 
@@ -79,21 +78,8 @@ async function deleteTag(tid: number) {
 
 <template>
   <div class="flex items-center gap-1 py-3">
-    <span v-for="tag in tags" :key="tag.id" class="badge badge-primary text-nowrap relative tag-box">
-      <component :is="TrashIcon" class="shrink-0 h-4 w-4 absolute -right-0.5 -translate-y-2 cursor-pointer trash-icon"
-        @click="deleteTag(tag.id)"
-      />
-      <TagField :tag-value="tag.tag" :tag-id="tag.id" @tag-changed="updateTag"/>
+    <span v-for="tag in tags" :key="tag.id" class="badge badge-primary text-nowrap relative tag-box pr-5">
+      <TagField :tag-value="tag.tag" :tag-id="tag.id" @tag-changed="updateTag" @tag-deleted="deleteTag"/>
     </span>
   </div>
 </template>
-
-<style lang="css" scoped>
-.trash-icon {
-  display: none;
-}
-
-.tag-box:hover .trash-icon {
-  display: block;
-}
-</style>

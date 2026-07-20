@@ -85,7 +85,7 @@ async function deleteResource() {
 <template>
   <div class="relative flex pr-6">
     <component :is="BookmarkIcon" class="h-5 w-6 shrink-0"/>
-    <span v-if="!isEditing" class="items-center rounded-lg transition-colors gap-1 text-ellipsis overflow-hidden whitespace-nowrap inline-block w-30">
+    <span v-if="!isEditing" class="items-center rounded-lg transition-colors gap-1 text-ellipsis overflow-hidden whitespace-nowrap inline-block w-45">
       {{ url }}
     </span>
 
@@ -94,7 +94,7 @@ async function deleteResource() {
       v-model="url"
       @blur="toggleEditMode(); validateAndSave(resourceId)"
       ref="editInput"
-      class="w-30 input h-6"
+      class="w-45 input h-6"
     />
     <button @click="toggleEditMode" class="btn btn-ghost absolute translate-y-3 h-5 w-5 shrink-0 pr-0 pl-0 right-0">
       <component :is="PencilIcon" class="shrink-0 h-4 w-4"/>
